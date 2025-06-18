@@ -49,20 +49,22 @@ def main():
     #temporary
     scan_id = "8101a57f-3004-4398-bfc4-ea30846ada14"
 
-    # Read GitHub event payload
-    # with open(os.environ['GITHUB_EVENT_PATH']) as f:
-    #     event = json.load(f)
+    # Read JIRA event payload
+    with open(os.environ['GITHUB_EVENT_PATH']) as f:
+        event = json.load(f)
 
-    # payload = event.get("client_payload", {})
-    # summary = payload.get("summary", "No summary provided")
-    # description = payload.get("description", "No description provided")
+    payload = event.get("client_payload", {})
+    issue_key = payload.get("issue_key", "No issue key")
+    summary = payload.get("summary", "No summary provided")
+    description = payload.get("description", "No description provided")
 
-    # print(f"Summary: {summary}")
-    # print(f"Description: {description}")
+    print(f"issue_key: {issue_key}")
+    print(f"Summary: {summary}")
+    print(f"Description: {description}")
     
     config_environment = "CX-PRU-NPROD"
 
-    jira_api_actions = JiraApiActions()
+    # jira_api_actions = JiraApiActions()
     cx_api_actions = CxApiActions(config_environment)
 
     access_token = cx_api_actions.get_access_token()
