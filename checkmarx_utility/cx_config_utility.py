@@ -20,7 +20,7 @@ class Config:
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
 
-    def get_config(self, section):
+    def get_config(self, section=None):
         """Return config values either from env or file."""
         if self.token and self.tenant_name and self.tenant_iam_url and self.tenant_url:
             return self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url

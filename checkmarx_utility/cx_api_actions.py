@@ -13,7 +13,7 @@ import sys
 
 class CxApiActions:
 
-    def __init__(self, configEnvironment):
+    def __init__(self, configEnvironment=None):
         self.httpRequest = HttpRequests()
         self.apiEndpoints = CxApiEndpoints()
         self.config = Config("config.env")

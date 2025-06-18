@@ -65,7 +65,7 @@ def main():
     config_environment = "CX-PRU-NPROD"
 
     # jira_api_actions = JiraApiActions()
-    cx_api_actions = CxApiActions()
+    cx_api_actions = CxApiActions(config_environment)
 
     access_token = cx_api_actions.get_access_token()
 
