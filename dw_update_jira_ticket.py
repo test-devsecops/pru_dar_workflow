@@ -46,6 +46,17 @@ def main():
 
     #temporary
     scan_id = "8101a57f-3004-4398-bfc4-ea30846ada14"
+
+    # Read GitHub event payload
+    with open(os.environ['GITHUB_EVENT_PATH']) as f:
+        event = json.load(f)
+
+    payload = event.get("client_payload", {})
+    summary = payload.get("summary", "No summary provided")
+    description = payload.get("description", "No description provided")
+
+    print(f"Summary: {summary}")
+    print(f"Description: {description}")
     
     config_environment = "CX-PRU-NPROD"
 
