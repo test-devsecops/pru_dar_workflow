@@ -16,9 +16,9 @@ class CxApiActions:
     def __init__(self, configEnvironment=None):
         self.httpRequest = HttpRequests()
         self.apiEndpoints = CxApiEndpoints()
-        self.config = Config("config.env")
+        self.config = Config() #"config.env"
 
-        self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url = self.config.get_config(configEnvironment)
+        self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url = self.config #.get_config(configEnvironment)
 
     @ExceptionHandler.handle_exception
     def get_access_token(self):
