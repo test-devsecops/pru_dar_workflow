@@ -46,6 +46,7 @@ def main():
 
     #temporary
     scan_id = "8101a57f-3004-4398-bfc4-ea30846ada14"
+    
     config_environment = "CX-PRU-NPROD"
 
     jira_api_actions = JiraApiActions()
