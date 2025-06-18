@@ -6,10 +6,10 @@ class Config:
     
     def __init__(self, config_file=None):
         """Load from environment variables first, fallback to config file."""
-        self.token = os.getenv('CX_TOKEN')
-        self.tenant_name = os.getenv('TENANT_NAME')
-        self.tenant_iam_url = os.getenv('TENANT_IAM_URL')
-        self.tenant_url = os.getenv('TENANT_URL')
+        self.token = os.getenv('CX_EU_TOKEN')
+        self.tenant_name = os.getenv('CX_TENANT_NAME')
+        self.tenant_iam_url = os.getenv('CX_TENANT_IAM_URL')
+        self.tenant_url = os.getenv('CX_TENANT_URL')
 
         if all([self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url]):
             # All vars loaded from environment, skip file loading
