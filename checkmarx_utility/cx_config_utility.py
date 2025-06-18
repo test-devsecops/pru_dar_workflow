@@ -19,7 +19,7 @@ class Config:
             self.use_env = True
             return
 
-        # Fallback to config file
+        # Fallback to config file - Default config file will be config_dev.env
         self.use_env = False
         self.config_file = config_file or os.path.join(os.path.dirname(__file__), '..', 'config_dev.env')
         self.config = configparser.ConfigParser()

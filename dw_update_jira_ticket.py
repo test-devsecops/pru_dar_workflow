@@ -1,5 +1,6 @@
 from jira_utility.jira_api_actions import JiraApiActions
 from checkmarx_utility.cx_api_actions import CxApiActions
+from checkmarx_utility.helper_functions import HelperFunctions
 
 from utils.logger import Logger
 
@@ -28,46 +29,23 @@ def get_severity_counts(scanner, severity_counters, total_count):
         result[f"{scanner}_{severity}"] = count
 
     result["TOTAL_COUNT"] = total_count
-    return result
-
-def calculate_sum_severity_counters(scan_details):
-
-    critical_total = ""
-    high_total = ""
-    medium_total = ""
-    low_total = ""
-    return 
+    return result 
 
 def main():
-
-    # Step 1: Script to look for the scan results with the tag
-    # Step 2: Compile the scan IDs
-    # Step 3: Loop through the scan IDs and get the details of each scan results
-    # Step 4: Collect the summary of the Scan Result (Number of findings per severity)
-    # Step 5: Find the Jira Ticket and update it with the collected summary
-
-    #temporary
-    scan_id = "8101a57f-3004-4398-bfc4-ea30846ada14"
-
-    # Read JIRA event payload
-    # with open(os.environ['GITHUB_EVENT_PATH']) as f:
-    #     event = json.load(f)
-
-    # payload = event.get("client_payload", {})
-    # issue_key = payload.get("issue_key", "No issue key")
-    # summary = payload.get("summary", "No summary provided")
-    # description = payload.get("description", "No description provided")
-
-    # print(f"issue_key: {issue_key}")
-    # print(f"Summary: {summary}")
-    # print(f"Description: {description}")
     
     config_environment = "CX-PRU-NPROD"
+    # Scan ID: 8101a57f-3004-4398-bfc4-ea30846ada14
 
     # jira_api_actions = JiraApiActions()
     cx_api_actions = CxApiActions(config_environment)
 
     access_token = cx_api_actions.get_access_token()
+
+    date_today = HelperFunctions.get_today_date_yyyymmdd()
+
+    scans = cx_api_actions.get_scans_by_tags_keys(access_token, date_today)
+    scan_result = scans.get("scans", [{}])[0]
+    scan_id = scan_result.get("id", {})
 
     scan_details = cx_api_actions.get_scan_summary(access_token, scan_id)
     scan_summary = scan_details.get("scansSummaries", [{}])[0]

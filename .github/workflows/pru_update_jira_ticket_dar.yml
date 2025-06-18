@@ -1,8 +1,7 @@
 name: Pru DAR Workflow - Update JIRA Ticket
 
 on:
-  repository_dispatch:
-    types: [jira-trigger]
+  workflow_dispatch:
 
 jobs:
   run-checkmarx-onboarder:
