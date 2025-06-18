@@ -5,13 +5,26 @@ import sys
 class Config:
     
     def __init__(self, config_file=None):
-        """Initialize and load the config.env file."""
+        """Load from environment variables first, fallback to config file."""
+        self.token = os.getenv('CX_TOKEN')
+        self.tenant_name = os.getenv('TENANT_NAME')
+        self.tenant_iam_url = os.getenv('TENANT_IAM_URL')
+        self.tenant_url = os.getenv('TENANT_URL')
+
+        if all([self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url]):
+            # All vars loaded from environment, skip file loading
+            return
+
+        # Fallback to config file
         self.config_file = config_file or os.path.join(os.path.dirname(__file__), '..', 'config_dev.env')
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
 
     def get_config(self, section):
-        """Retrieve environment variables from a specific section in the .env file."""
+        """Return config values either from env or file."""
+        if self.token and self.tenant_name and self.tenant_iam_url and self.tenant_url:
+            return self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url
+
         if section not in self.config:
             print(f"Error: Section [{section}] not found in {self.config_file}")
             sys.exit(1)

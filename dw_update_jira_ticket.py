@@ -40,23 +40,25 @@ def calculate_sum_severity_counters(scan_details):
 
 def main():
 
-    # Step 1: Find the scan result using the scan ID
-    # Step 2: Collect the summary of the Scan Result (Number of findings per severity)
-    # Step 3: Find the Jira Ticket and update it with the collected summary
+    # Step 1: Script to look for the scan results with the tag
+    # Step 2: Compile the scan IDs
+    # Step 3: Loop through the scan IDs and get the details of each scan results
+    # Step 4: Collect the summary of the Scan Result (Number of findings per severity)
+    # Step 5: Find the Jira Ticket and update it with the collected summary
 
     #temporary
     scan_id = "8101a57f-3004-4398-bfc4-ea30846ada14"
 
     # Read GitHub event payload
-    with open(os.environ['GITHUB_EVENT_PATH']) as f:
-        event = json.load(f)
+    # with open(os.environ['GITHUB_EVENT_PATH']) as f:
+    #     event = json.load(f)
 
-    payload = event.get("client_payload", {})
-    summary = payload.get("summary", "No summary provided")
-    description = payload.get("description", "No description provided")
+    # payload = event.get("client_payload", {})
+    # summary = payload.get("summary", "No summary provided")
+    # description = payload.get("description", "No description provided")
 
-    print(f"Summary: {summary}")
-    print(f"Description: {description}")
+    # print(f"Summary: {summary}")
+    # print(f"Description: {description}")
     
     config_environment = "CX-PRU-NPROD"
 
