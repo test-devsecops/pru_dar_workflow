@@ -99,7 +99,6 @@ def main():
     
     print(container_severity_count)
 
-
     # requests_results = jira_api_actions.get_queues()
     # print(requests_results)
 

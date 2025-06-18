@@ -1,0 +1,26 @@
+name: Pru DAR Workflow - Update JIRA Ticket
+
+on:
+  repository_dispatch:
+    types: [jira-trigger]
+
+jobs:
+  run-checkmarx-onboarder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Triage Script
+        run: python3 dw_update_jira_ticket.py
