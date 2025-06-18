@@ -1,28 +1,33 @@
-import configparser
 import os
 import sys
+import configparser
 
 class Config:
     
     def __init__(self, config_file=None):
         """Load from environment variables first, fallback to config file."""
-        self.token = os.getenv('CX_EU_TOKEN')
-        self.tenant_name = os.getenv('CX_TENANT_NAME')
-        self.tenant_iam_url = os.getenv('CX_TENANT_IAM_URL')
-        self.tenant_url = os.getenv('CX_TENANT_URL')
+        env_token = os.getenv('CX_EU_TOKEN')
+        env_tenant_name = os.getenv('CX_TENANT_NAME')
+        env_iam_url = os.getenv('CX_TENANT_IAM_URL')
+        env_tenant_url = os.getenv('CX_TENANT_URL')
 
-        if all([self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url]):
-            # All vars loaded from environment, skip file loading
+        if all([env_token, env_tenant_name, env_iam_url, env_tenant_url]):
+            self.token = env_token
+            self.tenant_name = env_tenant_name
+            self.tenant_iam_url = env_iam_url
+            self.tenant_url = env_tenant_url
+            self.use_env = True
             return
 
         # Fallback to config file
+        self.use_env = False
         self.config_file = config_file or os.path.join(os.path.dirname(__file__), '..', 'config_dev.env')
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
 
-    def get_config(self, section=None):
-        """Return config values either from env or file."""
-        if self.token and self.tenant_name and self.tenant_iam_url and self.tenant_url:
+    def get_config(self, section='DEFAULT'):
+        """Return config values from environment or config file."""
+        if self.use_env:
             return self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url
 
         if section not in self.config:
