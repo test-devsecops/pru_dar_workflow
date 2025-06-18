@@ -194,4 +194,4 @@ cython_debug/
 .cursorindexingignore
 
 config.env
-cx_config.env
+config_dev.env

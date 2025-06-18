@@ -25,7 +25,7 @@ class Config:
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
 
-    def get_config(self, section='DEFAULT'):
+    def get_config(self, section='CX-PRU-NPROD'):
         """Return config values from environment or config file."""
         if self.use_env:
             return self.token, self.tenant_name, self.tenant_iam_url, self.tenant_url
