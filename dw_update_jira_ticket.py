@@ -33,67 +33,75 @@ def get_severity_counts(scanner, severity_counters, total_count):
 
 def main():
     
-    config_environment = "CX-PRU-NPROD"
-    # Scan ID: 8101a57f-3004-4398-bfc4-ea30846ada14
+    cx_config_environment = "CX-PRU-NPROD"
+    jira_config_environment = "JIRA-EIS"
 
-    # jira_api_actions = JiraApiActions()
-    cx_api_actions = CxApiActions(config_environment)
+    jira_api_actions = JiraApiActions(jira_config_environment)
+    cx_api_actions = CxApiActions(cx_config_environment)
 
     access_token = cx_api_actions.get_access_token()
 
     date_today = HelperFunctions.get_today_date_yyyymmdd()
-
+    
     scans = cx_api_actions.get_scans_by_tags_keys(access_token, date_today)
-    scan_result = scans.get("scans", [{}])[0]
-    scan_id = scan_result.get("id", {})
+    scan_list = scans.get("scans", [])
 
-    scan_details = cx_api_actions.get_scan_summary(access_token, scan_id)
-    scan_summary = scan_details.get("scansSummaries", [{}])[0]
+    scan_ids = []
+    for scan in scan_list:
+        scan_id = scan.get("id")
+        if scan_id is not None:
+            scan_ids.append(scan_id)
 
-    # Get SAST scan information
-    sast_severity_counters = scan_summary.get("sastCounters", {}).get("severityCounters", {})
-    sast_total_count = scan_summary.get("sastCounters", {}).get("totalCounter", {})
-    sast_severity_count = get_severity_counts("SAST", sast_severity_counters, sast_total_count)
-    
-    print(sast_severity_count)
+    for scan_id in scan_ids:
 
-    # Get KICS scan information
-    kics_severity_counters = scan_summary.get("kicsCounters", {}).get("severityCounters", {})
-    kics_total_count = scan_summary.get("kicsCounters", {}).get("totalCounter", {})
-    kics_severity_count = get_severity_counts("KICS", kics_severity_counters, kics_total_count)
-    
-    print(kics_severity_count)
+        print(f"Scan ID: {scan_id}")
+        scan_details = cx_api_actions.get_scan_summary(access_token, scan_id)
+        scan_summary = scan_details.get("scansSummaries", [{}])[0]
 
-    # Get SCA scan information
-    sca_severity_counters = scan_summary.get("scaCounters", {}).get("severityCounters", {})
-    sca_total_count = scan_summary.get("scaCounters", {}).get("totalCounter", {})
-    sca_severity_count = get_severity_counts("SCA", sca_severity_counters, sca_total_count)
-    
-    print(sca_severity_count)
+        # Get SAST scan information
+        sast_severity_counters = scan_summary.get("sastCounters", {}).get("severityCounters", {})
+        sast_total_count = scan_summary.get("sastCounters", {}).get("totalCounter", {})
+        sast_severity_count = get_severity_counts("SAST", sast_severity_counters, sast_total_count)
+        
+        print(sast_severity_count)
 
-    # Get API Security scan information
-    apisec_severity_counters = scan_summary.get("apiSecCounters", {}).get("severityCounters", {})
-    apisec_total_count = scan_summary.get("apiSecCounters", {}).get("totalCounter", {})
-    apisec_severity_count = get_severity_counts("API-SEC", apisec_severity_counters, apisec_total_count)
-    
-    print(apisec_severity_count)
+        # Get KICS scan information
+        kics_severity_counters = scan_summary.get("kicsCounters", {}).get("severityCounters", {})
+        kics_total_count = scan_summary.get("kicsCounters", {}).get("totalCounter", {})
+        kics_severity_count = get_severity_counts("KICS", kics_severity_counters, kics_total_count)
+        
+        print(kics_severity_count)
 
-    # Get Micro Engines Security scan information
-    micro_severity_counters = scan_summary.get("microEnginesCounters", {}).get("severityCounters", {})
-    micro_total_count = scan_summary.get("microEnginesCounters", {}).get("totalCounter", {})
-    micro_severity_count = get_severity_counts("MICRO-ENG", micro_severity_counters, micro_total_count)
-    
-    print(micro_severity_count)
+        # Get SCA scan information
+        sca_severity_counters = scan_summary.get("scaCounters", {}).get("severityCounters", {})
+        sca_total_count = scan_summary.get("scaCounters", {}).get("totalCounter", {})
+        sca_severity_count = get_severity_counts("SCA", sca_severity_counters, sca_total_count)
+        
+        print(sca_severity_count)
 
-    # Get Container Security scan information
-    container_severity_counters = scan_summary.get("containersCounters", {}).get("severityCounters", {})
-    container_total_count = scan_summary.get("containersCounters", {}).get("totalCounter", {})
-    container_severity_count = get_severity_counts("CONTAINER", container_severity_counters, container_total_count)
-    
-    print(container_severity_count)
+        # Get API Security scan information
+        apisec_severity_counters = scan_summary.get("apiSecCounters", {}).get("severityCounters", {})
+        apisec_total_count = scan_summary.get("apiSecCounters", {}).get("totalCounter", {})
+        apisec_severity_count = get_severity_counts("API-SEC", apisec_severity_counters, apisec_total_count)
+        
+        print(apisec_severity_count)
 
-    # requests_results = jira_api_actions.get_queues()
-    # print(requests_results)
+        # Get Micro Engines Security scan information
+        micro_severity_counters = scan_summary.get("microEnginesCounters", {}).get("severityCounters", {})
+        micro_total_count = scan_summary.get("microEnginesCounters", {}).get("totalCounter", {})
+        micro_severity_count = get_severity_counts("MICRO-ENG", micro_severity_counters, micro_total_count)
+        
+        print(micro_severity_count)
+
+        # Get Container Security scan information
+        container_severity_counters = scan_summary.get("containersCounters", {}).get("severityCounters", {})
+        container_total_count = scan_summary.get("containersCounters", {}).get("totalCounter", {})
+        container_severity_count = get_severity_counts("CONTAINER", container_severity_counters, container_total_count)
+        
+        print(container_severity_count)
+
+    requests_results = jira_api_actions.get_queues()
+    print(requests_results)
 
 if __name__ == "__main__":
     main()

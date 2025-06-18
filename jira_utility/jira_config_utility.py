@@ -1,28 +1,43 @@
-import configparser
 import os
 import sys
+import configparser
 
 class Config:
     
     def __init__(self, config_file=None):
-        """Initialize and load the config.env file."""
+        """Load from environment variables first, fallback to config file."""
+        env_token = os.getenv('JIRA_PAT')
+        env_project_id = os.getenv('JIRA_PROJECT_ID')
+        env_jira_url = os.getenv('JIRA_URL')
+
+        if all([env_token, env_project_id, env_jira_url]):
+            self.token = env_token
+            self.project_id = env_project_id
+            self.jira_url = env_jira_url
+            self.use_env = True
+            return
+
+        # Fallback to config file - Default config file will be config_dev.env
+        self.use_env = False
         self.config_file = config_file or os.path.join(os.path.dirname(__file__), '..', 'config_dev.env')
         self.config = configparser.ConfigParser()
         self.config.read(self.config_file)
 
-    def get_config(self, section):
-        """Retrieve environment variables from a specific section in the .env file."""
+    def get_config(self, section='JIRA-EIS'):
+        """Return config values from environment or config file."""
+        if self.use_env:
+            return self.token, self.project_id, self.jira_url
+
         if section not in self.config:
             print(f"Error: Section [{section}] not found in {self.config_file}")
             sys.exit(1)
 
         try:
-            access_token = self.config[section]['PERSONAL_ACCESS_TOKEN']
+            token = self.config[section]['JIRA_PAT']
+            project_id = self.config[section]['JIRA_PROJECT_ID']
             jira_url = self.config[section]['JIRA_URL']
-            project_id = self.config[section]['PROJECT_ID']
-
         except KeyError as e:
-            print(f"Error: Missing key {e} in section [{section}] of {self.config_file}")
+            print(f"JIRA Config Error: Missing key {e} in section [{section}] of {self.config_file}")
             sys.exit(1)
 
-        return access_token, jira_url, project_id
+        return token, project_id, jira_url

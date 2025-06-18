@@ -13,19 +13,18 @@ import sys
 
 class JiraApiActions:
 
-    def __init__(self):
+    def __init__(self, configEnvironment=None):
         self.httpRequest = HttpRequests()
         self.apiEndpoints = JiraApiEndpoints()
-        self.config = Config("config.env")
+        self.config = Config()
 
-        self.token, self.tenant_url, self.project_id = self.config.get_config("JIRA-EIS")
+        self.token, self.jira_url, self.project_id = self.config.get_config(configEnvironment)
 
     @ExceptionHandler.handle_exception
     def get_queues(self):
 
         endpoint = self.apiEndpoints.get_queues(self.project_id)
-
-        url = f"https://{self.tenant_url}{endpoint}"
+        url = f"https://{self.jira_url}{endpoint}"
 
         headers = {
             "Accept": "application/json",
@@ -33,5 +32,4 @@ class JiraApiActions:
         }
 
         response = self.httpRequest.get_api_request(url, headers)
-
         return response
