@@ -18,7 +18,7 @@ class JiraApiActions:
         self.apiEndpoints = JiraApiEndpoints()
         self.config = Config()
 
-        self.token, self.jira_url, self.project_id = self.config.get_config(configEnvironment)
+        self.token, self.project_id, self.jira_url = self.config.get_config(configEnvironment)
 
     @ExceptionHandler.handle_exception
     def get_queues(self):
