@@ -15,6 +15,7 @@ jobs:
       JIRA_PAT: ${{ secrets.JIRA_PAT }}
       JIRA_PROJECT_ID: ${{ vars.JIRA_PROJECT_ID }}
       JIRA_URL: ${{ vars.JIRA_URL }}
+      ISSUETYPE_ID: ${{ vars.ISSUETYPE_ID }}
 
     steps:
       - name: Checkout repository

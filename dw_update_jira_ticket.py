@@ -41,7 +41,8 @@ def main():
 
     access_token = cx_api_actions.get_access_token()
 
-    date_today = HelperFunctions.get_today_date_yyyymmdd()
+    # date_today = HelperFunctions.get_today_date_yyyymmdd()
+    date_today = "20250619"
     
     scans = cx_api_actions.get_scans_by_tags_keys(access_token, date_today)
     scan_list = scans.get("scans", [])
@@ -100,8 +101,14 @@ def main():
         
         print(container_severity_count)
 
-    requests_results = jira_api_actions.get_queues()
-    print(requests_results)
+        # Create JIRA Issue
+
+        jira_ticket_values= {
+            "description": sast_severity_count,
+            "summary": scan_id
+        }
+        
+        jira_api_actions.create_issue(jira_ticket_values)
 
 if __name__ == "__main__":
     main()
