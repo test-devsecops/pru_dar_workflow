@@ -64,7 +64,7 @@ class CxApiActions:
         return response
     
     @ExceptionHandler.handle_exception
-    def get_scans_by_tags_keys(self, access_token, scan_tag_keys):
+    def get_scans_by_tags_keys(self, access_token, tags):
 
         endpoint = self.apiEndpoints.get_scans()
         url = f"https://{self.tenant_url}{endpoint}"
@@ -75,10 +75,66 @@ class CxApiActions:
             "Content-Type": "application/json; version=1.0"
         }
         
-        params = {
-            "tags-keys": [scan_tag_keys]
-        }
-
+        params = tags
         response = self.httpRequest.get_api_request(url, headers=headers, params=params)
         return response
+    
+    @ExceptionHandler.handle_exception
+    def get_application_by_id(self, access_token, application_id):
+        endpoint = self.apiEndpoints.get_application_info(application_id)
         
+        url = f"https://{self.tenant_url}{endpoint}"
+
+        headers = {
+            "accept": "application/json; version=1.0",
+            "authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; version=1.0"
+        }
+
+        response = self.httpRequest.get_api_request(url, headers=headers)
+        return response
+
+    @ExceptionHandler.handle_exception
+    def get_project_info_by_id(self, access_token, project_id):
+        
+        endpoint = self.apiEndpoints.get_project_info(project_id)
+        url = f"https://{self.tenant_url}{endpoint}"
+
+        headers = {
+            "accept": "application/json; version=1.0",
+            "authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; version=1.0"
+        }
+
+        response = self.httpRequest.get_api_request(url, headers=headers)
+        return response
+
+    @ExceptionHandler.handle_exception
+    def update_scan_tags(self, access_token, scan_id, tags_dict):
+        
+        endpoint = self.apiEndpoints.update_scan_tags(scan_id)
+        url = f"https://{self.tenant_url}{endpoint}"
+
+        headers = {
+            "accept": "application/json; version=1.0",
+            "authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; version=1.0"
+        }
+
+        payload = {
+            "tags": tags_dict
+        }
+
+        response = self.httpRequest.put_api_request(url, headers=headers, json=payload)
+        return response
+
+
+
+
+
+
+    @ExceptionHandler.handle_exception
+    def get_tenant_url(self):
+        return self.tenant_url
+        
+    

@@ -29,3 +29,18 @@ class CxApiEndpoints:
     def get_sast_results():
         endpoint = f"/api/sast-results"
         return endpoint
+
+    @staticmethod
+    def get_project_info(project_id):
+        endpoint = f"/api/projects/{project_id}"
+        return endpoint
+
+    @staticmethod
+    def get_application_info(application_id):
+        endpoint = f"/api/applications/{application_id}"
+        return endpoint
+
+    @staticmethod
+    def update_scan_tags(scan_id):
+        endpoint = f"/api/scans/{scan_id}/tags"
+        return endpoint

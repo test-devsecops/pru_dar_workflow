@@ -14,7 +14,7 @@ class HelperFunctions:
     @staticmethod
     def get_lbu_name_simple(app_name):
         """
-        Extracts the LBU name directly after 'pru-' in the given app_name.
+        Extracts the LBU name directly after 'pru-' in the given project_name.
         Does not validate against any JSON list.
         """
         match = re.search(r'^pru-([\w]+)', app_name, re.IGNORECASE)

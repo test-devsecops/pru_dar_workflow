@@ -45,10 +45,11 @@ class JiraApiActions:
             "Authorization": f"Bearer {self.token}"
         }
 
-        # Format the description dictionary into a string. This is temporary and can be removed or changed in the future.
-        description_text = "\n".join(
-            f"{key}: {value}" for key, value in fields_values['description'].items()
-        )
+        description_text = ""
+        # # Format the description dictionary into a string. This is temporary and can be removed or changed in the future.
+        # description_text = "\n".join(
+        #     f"{key}: {value}" for key, value in fields_values['description'].items()
+        # )
 
         payload = {
             "fields": {
@@ -59,7 +60,15 @@ class JiraApiActions:
                     "id": self.issuetype_id
                 },
                 "description": description_text,
-                "summary": fields_values["summary"]
+                "summary": fields_values["summary"],
+                "customfield_16500" : fields_values["lbu"],
+                "customfield_16501" : fields_values["project_name"],
+                "customfield_16704" : fields_values["application_name"],
+                "customfield_16504" : fields_values["scan_report_link"],
+                "customfield_16700" : fields_values["num_of_critical"],
+                "customfield_16701" : fields_values["num_of_high"],
+                "customfield_16702" : fields_values["num_of_medium"],
+                "customfield_16703" : fields_values["num_of_low"],
             }
         }
 
