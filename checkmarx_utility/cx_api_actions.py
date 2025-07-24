@@ -128,6 +128,41 @@ class CxApiActions:
         response = self.httpRequest.put_api_request(url, headers=headers, json=payload)
         return response
 
+    @ExceptionHandler.handle_exception
+    def get_scan_all_info(self, access_token, scan_id):
+        
+        endpoint = self.apiEndpoints.get_scan_all_info()
+        url = f"https://{self.tenant_url}{endpoint}"
+
+        params = {'scan-id' : scan_id}
+
+        headers = {
+            "accept": "application/json; version=1.0",
+            "authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; version=1.0"
+        }
+
+        response = self.httpRequest.get_api_request(url, headers=headers, params=params)
+        return response
+
+    @ExceptionHandler.handle_exception
+    def get_scan_details(self, access_token, scan_id):
+        
+        endpoint = self.apiEndpoints.get_scan_details(scan_id)
+        url = f"https://{self.tenant_url}{endpoint}"
+
+
+        headers = {
+            "accept": "application/json; version=1.0",
+            "authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; version=1.0"
+        }
+
+        response = self.httpRequest.get_api_request(url, headers=headers)
+        return response
+
+
+
 
 
 

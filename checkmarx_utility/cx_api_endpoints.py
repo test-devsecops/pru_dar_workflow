@@ -44,3 +44,8 @@ class CxApiEndpoints:
     def update_scan_tags(scan_id):
         endpoint = f"/api/scans/{scan_id}/tags"
         return endpoint
+
+    @staticmethod
+    def get_scan_all_info():
+        endpoint = f"/api/results/"
+        return endpoint

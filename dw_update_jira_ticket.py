@@ -2,6 +2,7 @@ from jira_utility.jira_api_actions import JiraApiActions
 from checkmarx_utility.cx_api_actions import CxApiActions
 from checkmarx_utility.helper_functions import HelperFunctions
 from checkmarx_utility.cx_config_utility import Config
+import urllib
 
 from utils.logger import Logger
 
@@ -52,11 +53,31 @@ def assemble_url_link(url :str, scan_data : dict ) -> str:
     url_string = url
     project_id = scan_data.get('projectId')
     scan_id = scan_data.get('id')
-    branch = scan_data.get('branch')
+    branch = urllib.parse.quote_plus(scan_data.get('branch'))
+    
 
     return f"https://{url_string}/projects/{project_id}/scans?id={scan_id}&branch={branch}"
 
+def assemble_scan_individual_link(scan_endpoint: str, url :str, scan_data : dict ) -> str:
+    url_string = url
+    project_id = scan_data.get('projectId')
+    scan_id = scan_data.get('id')
+    branch = urllib.parse.quote_plus(scan_data.get('branch'))
+    alternate_links_scans = ["apisec","kics"]
 
+    if scan_endpoint in alternate_links_scans:
+        return f"https://{url_string}/results/{scan_id}/{project_id}/{scan_endpoint}"
+    
+    if scan_endpoint == 'sca':
+        return f"https://{url_string}/sca/#/projects/{project_id}/reports/${scan_id}/vulnerabilities"
+
+    return f"https://{url_string}/{scan_endpoint}/{project_id}/{scan_id}"
+
+
+def url_links_for_all_scans(all_scan_data : list):
+    print()
+    for scan_type in all_scan_data:
+        print(scan_type)
 
 
 def main():
@@ -83,8 +104,14 @@ def main():
         
 
         print(f"Scan ID: {scan_id}")
-        scan_details = cx_api_actions.get_scan_summary(access_token, scan_id)
-        scan_summary = scan_details.get("scansSummaries", [{}])[0]
+        scan_summary = cx_api_actions.get_scan_summary(access_token, scan_id)
+        # all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
+        print("SCAN DETAILS")
+        scan_details = cx_api_actions.get_scan_details(access_token, scan_id=scan_id)
+        print(scan_details)
+        
+        # all_scan_urls = url_links_for_all_scans(all_scans_details)
+        scan_summary = scan_summary.get("scansSummaries", [{}])[0]
 
         # Get SAST scan information
         sast_severity_counters = scan_summary.get("sastCounters", {}).get("severityCounters", {})
@@ -140,6 +167,8 @@ def main():
 
         application = "Unavailable"
         application_ids = project_info.get('applicationIds', [])
+        project_tags = project_info.get("tags", {})
+        project_tags = list(project_tags.keys())
         applications = []
         
         for app in application_ids:
@@ -151,7 +180,7 @@ def main():
 
         # Create JIRA Issue
         jira_ticket_values= {
-            "description": "",
+            "description": [],
             "summary": scan_id,
             "lbu": HelperFunctions.get_lbu_name_simple(scan_data.get('projectName')),
             "project_name" : scan_data.get('projectName'),
@@ -160,15 +189,24 @@ def main():
             "num_of_critical" : severity_total.get('critical'),
             "num_of_high" : severity_total.get('high'),
             "num_of_medium" : severity_total.get('medium'),
-            "num_of_low" : severity_total.get('low') 
+            "num_of_low" : severity_total.get('low'),
+            "tag" : ",".join(project_tags),
+            "branch_desc" : scan_data.get('branch'), 
+            "Scan URL" : [assemble_scan_individual_link(scan_endpoint='sast-results',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
+                          assemble_scan_individual_link(scan_endpoint='container-security-results',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
+                          assemble_scan_individual_link(scan_endpoint='supply-chain',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
+                          assemble_scan_individual_link(scan_endpoint='container-security-results',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
+                            ]
         }
+
+        print(jira_ticket_values)
 
         
         # jira_api_actions.create_issue(jira_ticket_values)
 
         scan_tags["DAR"] = "DONE"
 
-        tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
+        # tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
 
 if __name__ == "__main__":
     main()
