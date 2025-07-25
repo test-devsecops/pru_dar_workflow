@@ -13,6 +13,15 @@ import re
 import time
 import json
 
+engine_endpoints = {
+    "sast" : "sast-results",
+    "sca" : "sca",
+    "apisec" : "apisec",
+    "containers" : "container-security-results",
+    "kics" : "kics",
+    "microengines" : "supply-chain" # scs
+}
+
 def get_severity_counts(scanner, severity_counters, total_count):
     result = {}
     
@@ -55,21 +64,21 @@ def assemble_url_link(url :str, scan_data : dict ) -> str:
     scan_id = scan_data.get('id')
     branch = urllib.parse.quote_plus(scan_data.get('branch'))
     
-
-    return f"https://{url_string}/projects/{project_id}/scans?id={scan_id}&branch={branch}"
+    return f"https://{url_string}/projects/{project_id}/scans?branch={branch}&filter_by_Scan_id={scan_id}"
 
 def assemble_scan_individual_link(scan_endpoint: str, url :str, scan_data : dict ) -> str:
     url_string = url
     project_id = scan_data.get('projectId')
     scan_id = scan_data.get('id')
     branch = urllib.parse.quote_plus(scan_data.get('branch'))
+
     alternate_links_scans = ["apisec","kics"]
 
     if scan_endpoint in alternate_links_scans:
         return f"https://{url_string}/results/{scan_id}/{project_id}/{scan_endpoint}"
     
     if scan_endpoint == 'sca':
-        return f"https://{url_string}/sca/#/projects/{project_id}/reports/${scan_id}/vulnerabilities"
+        return f"https://{url_string}/results/{project_id}/{scan_id}/sca?internalPath=%2Fpackages"
 
     return f"https://{url_string}/{scan_endpoint}/{project_id}/{scan_id}"
 
@@ -79,8 +88,23 @@ def url_links_for_all_scans(all_scan_data : list):
     for scan_type in all_scan_data:
         print(scan_type)
 
+def create_url_links(scan_data : list, engine_endpoints: dict, url: str) -> list:
+    scan_engines = scan_data.get("engines")
 
-def main():
+    scan_engine_links = []
+    for scan in scan_engines:
+        try:
+            if scan not in engine_endpoints:
+                raise ValueError(f"Unknown Engine - {scan}")
+            scan_engine_links.append(assemble_scan_individual_link(scan_endpoint=engine_endpoints.get(scan),
+                                                                url=url,
+                                                                scan_data=scan_data))
+        except ValueError as e:
+            print(f"Caught Error on creating URL Links: {e}")
+    return scan_engine_links
+
+
+def main2():
     
     cx_config_environment = "CX-PRU-NPROD"
     jira_config_environment = "JIRA-EIS"
@@ -180,26 +204,26 @@ def main():
 
         # Create JIRA Issue
         jira_ticket_values= {
-            "description": [],
+            "description": {
+                "Branch" : scan_data.get("branch",""),
+                "Status" : scan_data.get("status",""),
+                "Scan Origin": scan_data.get("sourceOrigin","")
+
+            } ,
             "summary": scan_id,
             "lbu": HelperFunctions.get_lbu_name_simple(scan_data.get('projectName')),
             "project_name" : scan_data.get('projectName'),
             "application_name" : application,
             "scan_report_link" : assemble_url_link(url = cx_api_actions.get_tenant_url(), scan_data = scan_data), 
-            "num_of_critical" : severity_total.get('critical'),
-            "num_of_high" : severity_total.get('high'),
-            "num_of_medium" : severity_total.get('medium'),
-            "num_of_low" : severity_total.get('low'),
+            "num_of_critical" : severity_total.get('critical',0),
+            "num_of_high" : severity_total.get('high',0),
+            "num_of_medium" : severity_total.get('medium',0),
+            "num_of_low" : severity_total.get('low',0),
             "tag" : ",".join(project_tags),
-            "branch_desc" : scan_data.get('branch'), 
-            "Scan URL" : [assemble_scan_individual_link(scan_endpoint='sast-results',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
-                          assemble_scan_individual_link(scan_endpoint='container-security-results',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
-                          assemble_scan_individual_link(scan_endpoint='supply-chain',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
-                          assemble_scan_individual_link(scan_endpoint='container-security-results',url = cx_api_actions.get_tenant_url(), scan_data = scan_data),
-                            ]
+            "Scan URL" :  create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
         }
 
-        print(jira_ticket_values)
+        print(json.dumps(jira_ticket_values, indent=1))
 
         
         # jira_api_actions.create_issue(jira_ticket_values)
@@ -207,6 +231,7 @@ def main():
         scan_tags["DAR"] = "DONE"
 
         # tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
+
 
 if __name__ == "__main__":
     main()
