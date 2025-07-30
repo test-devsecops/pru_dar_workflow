@@ -45,12 +45,7 @@ class JiraApiActions:
             "Authorization": f"Bearer {self.token}"
         }
 
-        description_text = ""
-        # # Format the description dictionary into a string. This is temporary and can be removed or changed in the future.
-        # description_text = "\n".join(
-        #     f"{key}: {value}" for key, value in fields_values['description'].items()
-        # )
-
+        # TODO Create a mapping config for the custom fields
         payload = {
             "fields": {
                 "project": {
@@ -59,7 +54,7 @@ class JiraApiActions:
                 "issuetype": {
                     "id": self.issuetype_id
                 },
-                "description": description_text,
+                "description": str(fields_values['description']),
                 "summary": fields_values["summary"],
                 "customfield_16500" : fields_values["lbu"],
                 "customfield_16501" : fields_values["project_name"],
@@ -69,6 +64,8 @@ class JiraApiActions:
                 "customfield_16701" : fields_values["num_of_high"],
                 "customfield_16702" : fields_values["num_of_medium"],
                 "customfield_16703" : fields_values["num_of_low"],
+                "customfield_16801" : fields_values['Scan URL'],
+                "customfield_16800" : fields_values['tag'],
             }
         }
 

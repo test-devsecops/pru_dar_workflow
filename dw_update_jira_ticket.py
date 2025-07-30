@@ -64,7 +64,7 @@ def assemble_url_link(url :str, scan_data : dict ) -> str:
     scan_id = scan_data.get('id')
     branch = urllib.parse.quote_plus(scan_data.get('branch'))
     
-    return f"https://{url_string}/projects/{project_id}/scans?branch={branch}&filter_by_Scan_id={scan_id}"
+    return f"https://{url_string}/projects/{project_id}/scans?branch={branch}&id={scan_id}"
 
 def assemble_scan_individual_link(scan_endpoint: str, url :str, scan_data : dict ) -> str:
     url_string = url
@@ -101,10 +101,14 @@ def create_url_links(scan_data : list, engine_endpoints: dict, url: str) -> list
                                                                 scan_data=scan_data))
         except ValueError as e:
             print(f"Caught Error on creating URL Links: {e}")
-    return scan_engine_links
+    # return scan_engine_links[0]
+    return "\n".join(scan_engine_links)
+
+def beautify_description(dict : dict):
+    return '\n'.join(f'{k}: {v}' for k, v in dict.items())
 
 
-def main2():
+def main():
     
     cx_config_environment = "CX-PRU-NPROD"
     jira_config_environment = "JIRA-EIS"
@@ -132,7 +136,23 @@ def main2():
         # all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
         print("SCAN DETAILS")
         scan_details = cx_api_actions.get_scan_details(access_token, scan_id=scan_id)
-        print(scan_details)
+        scan_metadata = cx_api_actions.get_scan_metadata(access_token, scan_id=scan_id)
+        is_incremental = False
+        scan_type = ""
+
+        if 'missing' in scan_metadata:
+            is_incremental = False
+        elif 'scans' in scan_metadata:
+            scan_check = scan_metadata.get('scans')
+            is_incremental = scan_check.pop().get('isIncremental')
+        
+        if is_incremental:
+            scan_type = "Incremental Scan"
+        else:
+            scan_type = "Full Scan"
+            
+        # print(scan_type)
+        # print(scan_details)
         
         # all_scan_urls = url_links_for_all_scans(all_scans_details)
         scan_summary = scan_summary.get("scansSummaries", [{}])[0]
@@ -188,7 +208,6 @@ def main2():
         
         project_info = cx_api_actions.get_project_info_by_id(access_token, project_id)
 
-
         application = "Unavailable"
         application_ids = project_info.get('applicationIds', [])
         project_tags = project_info.get("tags", {})
@@ -201,16 +220,21 @@ def main2():
 
         if applications:
             application = ", ".join(applications)
+        
+        description = {
+                "Branch" : scan_data.get("branch",""),
+                "Status" : scan_data.get("status",""),
+                "Scan Origin": scan_data.get("sourceOrigin",""),
+                "Scan Type": scan_type, 
+                "Scan ID": scan_id,
+                "Scan URL" : create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
+            }
+        description = beautify_description(description)
 
         # Create JIRA Issue
         jira_ticket_values= {
-            "description": {
-                "Branch" : scan_data.get("branch",""),
-                "Status" : scan_data.get("status",""),
-                "Scan Origin": scan_data.get("sourceOrigin","")
-
-            } ,
-            "summary": scan_id,
+            "description": description ,
+            "summary": scan_data.get('projectName'),
             "lbu": HelperFunctions.get_lbu_name_simple(scan_data.get('projectName')),
             "project_name" : scan_data.get('projectName'),
             "application_name" : application,
@@ -220,17 +244,17 @@ def main2():
             "num_of_medium" : severity_total.get('medium',0),
             "num_of_low" : severity_total.get('low',0),
             "tag" : ",".join(project_tags),
-            "Scan URL" :  create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
+            "Scan URL" :  create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url())
         }
 
         print(json.dumps(jira_ticket_values, indent=1))
-
         
-        # jira_api_actions.create_issue(jira_ticket_values)
+        create_issue = jira_api_actions.create_issue(jira_ticket_values)
+        # print(create_issue)
 
         scan_tags["DAR"] = "DONE"
 
-        # tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
+        tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
 
 
 if __name__ == "__main__":

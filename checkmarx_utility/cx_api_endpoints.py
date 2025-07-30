@@ -49,3 +49,8 @@ class CxApiEndpoints:
     def get_scan_all_info():
         endpoint = f"/api/results/"
         return endpoint
+
+    @staticmethod
+    def get_scan_metadata():
+        endpoint = f"/api/sast-metadata/"
+        return endpoint

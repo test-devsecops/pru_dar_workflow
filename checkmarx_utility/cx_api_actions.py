@@ -161,12 +161,23 @@ class CxApiActions:
         response = self.httpRequest.get_api_request(url, headers=headers)
         return response
 
+    @ExceptionHandler.handle_exception
+    def get_scan_metadata(self, access_token, scan_id):
+        
+        endpoint = self.apiEndpoints.get_scan_metadata()
+        url = f"https://{self.tenant_url}{endpoint}"
 
 
+        headers = {
+            "accept": "application/json; version=1.0",
+            "authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; version=1.0"
+        }
 
+        params = {"scan-ids" : scan_id}
 
-
-
+        response = self.httpRequest.get_api_request(url, headers=headers, params=params)
+        return response
 
     @ExceptionHandler.handle_exception
     def get_tenant_url(self):
