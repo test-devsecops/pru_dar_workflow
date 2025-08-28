@@ -2,6 +2,7 @@ from jira_utility.jira_api_actions import JiraApiActions
 from checkmarx_utility.cx_api_actions import CxApiActions
 from checkmarx_utility.helper_functions import HelperFunctions
 from checkmarx_utility.cx_config_utility import Config
+import urllib
 
 from utils.logger import Logger
 
@@ -11,6 +12,15 @@ import argparse
 import re
 import time
 import json
+
+engine_endpoints = {
+    "sast" : "sast-results",
+    "sca" : "sca",
+    "apisec" : "apisec",
+    "containers" : "container-security-results",
+    "kics" : "kics",
+    "microengines" : "supply-chain" # scs
+}
 
 def get_severity_counts(scanner, severity_counters, total_count):
     result = {}
@@ -52,11 +62,50 @@ def assemble_url_link(url :str, scan_data : dict ) -> str:
     url_string = url
     project_id = scan_data.get('projectId')
     scan_id = scan_data.get('id')
-    branch = scan_data.get('branch')
+    branch = urllib.parse.quote_plus(scan_data.get('branch'))
+    
+    return f"https://{url_string}/projects/{project_id}/scans?branch={branch}&id={scan_id}"
 
-    return f"https://{url_string}/projects/{project_id}/scans?id={scan_id}&branch={branch}"
+def assemble_scan_individual_link(scan_endpoint: str, url :str, scan_data : dict ) -> str:
+    url_string = url
+    project_id = scan_data.get('projectId')
+    scan_id = scan_data.get('id')
+    branch = urllib.parse.quote_plus(scan_data.get('branch'))
+
+    alternate_links_scans = ["apisec","kics"]
+
+    if scan_endpoint in alternate_links_scans:
+        return f"https://{url_string}/results/{scan_id}/{project_id}/{scan_endpoint}"
+    
+    if scan_endpoint == 'sca':
+        return f"https://{url_string}/results/{project_id}/{scan_id}/sca?internalPath=%2Fpackages"
+
+    return f"https://{url_string}/{scan_endpoint}/{project_id}/{scan_id}"
 
 
+def url_links_for_all_scans(all_scan_data : list):
+    print()
+    for scan_type in all_scan_data:
+        print(scan_type)
+
+def create_url_links(scan_data : list, engine_endpoints: dict, url: str) -> list:
+    scan_engines = scan_data.get("engines")
+
+    scan_engine_links = []
+    for scan in scan_engines:
+        try:
+            if scan not in engine_endpoints:
+                raise ValueError(f"Unknown Engine - {scan}")
+            scan_engine_links.append(assemble_scan_individual_link(scan_endpoint=engine_endpoints.get(scan),
+                                                                url=url,
+                                                                scan_data=scan_data))
+        except ValueError as e:
+            print(f"Caught Error on creating URL Links: {e}")
+    # return scan_engine_links[0]
+    return "\n".join(scan_engine_links)
+
+def beautify_description(dict : dict):
+    return '\n'.join(f'{k}: {v}' for k, v in dict.items())
 
 
 def main():
@@ -83,8 +132,30 @@ def main():
         
 
         print(f"Scan ID: {scan_id}")
-        scan_details = cx_api_actions.get_scan_summary(access_token, scan_id)
-        scan_summary = scan_details.get("scansSummaries", [{}])[0]
+        scan_summary = cx_api_actions.get_scan_summary(access_token, scan_id)
+        # all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
+        print("SCAN DETAILS")
+        scan_details = cx_api_actions.get_scan_details(access_token, scan_id=scan_id)
+        scan_metadata = cx_api_actions.get_scan_metadata(access_token, scan_id=scan_id)
+        is_incremental = False
+        scan_type = ""
+
+        if 'missing' in scan_metadata:
+            is_incremental = False
+        elif 'scans' in scan_metadata:
+            scan_check = scan_metadata.get('scans')
+            is_incremental = scan_check.pop().get('isIncremental')
+        
+        if is_incremental:
+            scan_type = "Incremental Scan"
+        else:
+            scan_type = "Full Scan"
+            
+        # print(scan_type)
+        # print(scan_details)
+        
+        # all_scan_urls = url_links_for_all_scans(all_scans_details)
+        scan_summary = scan_summary.get("scansSummaries", [{}])[0]
 
         # Get SAST scan information
         sast_severity_counters = scan_summary.get("sastCounters", {}).get("severityCounters", {})
@@ -137,9 +208,10 @@ def main():
         
         project_info = cx_api_actions.get_project_info_by_id(access_token, project_id)
 
-
         application = "Unavailable"
         application_ids = project_info.get('applicationIds', [])
+        project_tags = project_info.get("tags", {})
+        project_tags = list(project_tags.keys())
         applications = []
         
         for app in application_ids:
@@ -148,27 +220,42 @@ def main():
 
         if applications:
             application = ", ".join(applications)
+        
+        description = {
+                "Branch" : scan_data.get("branch",""),
+                "Status" : scan_data.get("status",""),
+                "Scan Origin": scan_data.get("sourceOrigin",""),
+                "Scan Type": scan_type, 
+                "Scan ID": scan_id,
+                "Scan URL" : create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
+            }
+        description = beautify_description(description)
 
         # Create JIRA Issue
         jira_ticket_values= {
-            "description": "",
-            "summary": scan_id,
+            "description": description ,
+            "summary": scan_data.get('projectName'),
             "lbu": HelperFunctions.get_lbu_name_simple(scan_data.get('projectName')),
             "project_name" : scan_data.get('projectName'),
             "application_name" : application,
             "scan_report_link" : assemble_url_link(url = cx_api_actions.get_tenant_url(), scan_data = scan_data), 
-            "num_of_critical" : severity_total.get('critical'),
-            "num_of_high" : severity_total.get('high'),
-            "num_of_medium" : severity_total.get('medium'),
-            "num_of_low" : severity_total.get('low') 
+            "num_of_critical" : severity_total.get('critical',0),
+            "num_of_high" : severity_total.get('high',0),
+            "num_of_medium" : severity_total.get('medium',0),
+            "num_of_low" : severity_total.get('low',0),
+            "tag" : ",".join(project_tags),
+            "Scan URL" :  create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url())
         }
 
+        print(json.dumps(jira_ticket_values, indent=1))
         
-        # jira_api_actions.create_issue(jira_ticket_values)
+        create_issue = jira_api_actions.create_issue(jira_ticket_values)
+        # print(create_issue)
 
         scan_tags["DAR"] = "DONE"
 
         tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
+
 
 if __name__ == "__main__":
     main()
