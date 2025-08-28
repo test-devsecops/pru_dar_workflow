@@ -1,39 +1,52 @@
 
-name: Echo Five Inputs and Outputs
+name: Update Jira Ticket
 
 on:
   workflow_dispatch:
     inputs:
-      input1:
-        description: 'Input 1'
+      scan_id:
+        description: 'Checkmarx Scan ID'
         required: true
-        default: 'one'
-      input2:
-        description: 'Input 2'
+        default: ''
+      commit_id:
+        description: 'Commit ID'
         required: true
-        default: 'two'
-      input3:
-        description: 'Input 3'
+        default: ''
+      jira_issue:
+        description: 'Jira Issue ID'
         required: true
-        default: 'three'
-      input4:
-        description: 'Input 4'
-        required: true
-        default: 'four'
-      input5:
-        description: 'Input 5'
-        required: true
-        default: 'five'
+        default: ''
 
 jobs:
-  echo-job:
+  run-dar-workflow:
     runs-on: ubuntu-latest
+
+    env:
+      CX_EU_TOKEN: ${{ secrets.CX_EU_TOKEN }}
+      CX_TENANT_NAME: ${{ vars.CX_TENANT_NAME }}
+      CX_TENANT_IAM_URL: ${{ vars.CX_TENANT_IAM_URL }}
+      CX_TENANT_URL: ${{ vars.CX_TENANT_URL }}
+      JIRA_PAT: ${{ secrets.JIRA_PAT }}
+      JIRA_PROJECT_ID: ${{ vars.JIRA_PROJECT_ID }}
+      JIRA_URL: ${{ vars.JIRA_URL }}
+      ISSUETYPE_ID: ${{ vars.ISSUETYPE_ID }}
+
     steps:
-      - name: Echo Inputs
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
         run: |
-          echo "Input 1: ${{ github.event.inputs.input1 }}"
-          echo "Input 2: ${{ github.event.inputs.input2 }}"
-          echo "Input 3: ${{ github.event.inputs.input3 }}"
-          echo "Input 4: ${{ github.event.inputs.input4 }}"
-          echo "Input 5: ${{ github.event.inputs.input5 }}"
-          echo "development branch"
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Triage Script
+        run: python3 dw_update_jira_ticket.py \
+            "${{ github.event.inputs.scan_id }}" \
+            "${{ github.event.inputs.commit_id }}" \
+            "${{ github.event.inputs.jira_issue }}" \
