@@ -36,3 +36,4 @@ jobs:
           echo "Input 3: ${{ github.event.inputs.input3 }}"
           echo "Input 4: ${{ github.event.inputs.input4 }}"
           echo "Input 5: ${{ github.event.inputs.input5 }}"
+          echo "development branch"
