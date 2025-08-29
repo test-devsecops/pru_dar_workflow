@@ -45,7 +45,7 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Triage Script
+      - name: Run DAR Script
         run: python3 dw_update_jira_ticket.py \
             "${{ github.event.inputs.scan_id }}" \
             "${{ github.event.inputs.commit_id }}" \

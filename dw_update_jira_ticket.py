@@ -124,19 +124,22 @@ def main():
 
     scan_id = sys.argv[1]
     commit_id = sys.argv[2]
-    jira_iissue_id = sys.argv[3]
+    jira_issue_id = sys.argv[3]
 
     print(scan_id)
     print(commit_id)
-    print(jira_iissue_id)
+    print(jira_issue_id)
     
-    # cx_config_environment = "CX-PRU-NPROD"
-    # jira_config_environment = "JIRA-EIS"
+    cx_config_environment = "CX-PRU-NPROD"
+    jira_config_environment = "JIRA-EIS"
 
-    # jira_api_actions = JiraApiActions(jira_config_environment)
-    # cx_api_actions = CxApiActions(cx_config_environment)
+    jira_api_actions = JiraApiActions(jira_config_environment)
+    cx_api_actions = CxApiActions(cx_config_environment)
 
-    # access_token = cx_api_actions.get_access_token()
+
+
+    print("getting access_token")
+    access_token = cx_api_actions.get_access_token()
     # tag_query = { 
     #     "tags-keys": ["DAR"],
     #     "tags-values" : [""]
@@ -152,125 +155,137 @@ def main():
         
 
     #     print(f"Scan ID: {scan_id}")
-    #     scan_summary = cx_api_actions.get_scan_summary(access_token, scan_id)
-    #     # all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
-    #     print("SCAN DETAILS")
-    #     scan_details = cx_api_actions.get_scan_details(access_token, scan_id=scan_id)
-    #     scan_metadata = cx_api_actions.get_scan_metadata(access_token, scan_id=scan_id)
-    #     is_incremental = False
-    #     scan_type = ""
+    # print("getting scan summary")
+    scan_summary = cx_api_actions.get_scan_summary(access_token, scan_id)
+    # print(scan_summary)
 
-    #     if 'missing' in scan_metadata:
-    #         is_incremental = False
-    #     elif 'scans' in scan_metadata:
-    #         scan_check = scan_metadata.get('scans')
-    #         is_incremental = scan_check.pop().get('isIncremental')
-        
-    #     if is_incremental:
-    #         scan_type = "Incremental Scan"
-    #     else:
-    #         scan_type = "Full Scan"
-            
-    #     # print(scan_type)
-    #     # print(scan_details)
-        
-    #     # all_scan_urls = url_links_for_all_scans(all_scans_details)
-    #     scan_summary = scan_summary.get("scansSummaries", [{}])[0]
+    # print("getting scan details")
 
-    #     # Get SAST scan information
-    #     sast_severity_counters = scan_summary.get("sastCounters", {}).get("severityCounters", {})
-    #     sast_total_count = scan_summary.get("sastCounters", {}).get("totalCounter", {})
-    #     sast_severity_count = get_severity_counts("SAST", sast_severity_counters, sast_total_count)
-        
-    #     # print(sast_severity_count)
+    all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
+    # print("SCAN DETAILS")
 
-    #     # Get KICS scan information
-    #     kics_severity_counters = scan_summary.get("kicsCounters", {}).get("severityCounters", {})
-    #     kics_total_count = scan_summary.get("kicsCounters", {}).get("totalCounter", {})
-    #     kics_severity_count = get_severity_counts("KICS", kics_severity_counters, kics_total_count)
-        
-    #     # print(kics_severity_count)
+    scan_details = cx_api_actions.get_scan_details(access_token, scan_id=scan_id)
+    project_id = scan_details.get("projectId")
+    # print(scan_details)
 
-    #     # Get SCA scan information
-    #     sca_severity_counters = scan_summary.get("scaCounters", {}).get("severityCounters", {})
-    #     sca_total_count = scan_summary.get("scaCounters", {}).get("totalCounter", {})
-    #     sca_severity_count = get_severity_counts("SCA", sca_severity_counters, sca_total_count)
-        
-    #     # print(sca_severity_count)
+    scan_metadata = cx_api_actions.get_scan_metadata(access_token, scan_id=scan_id)
+    is_incremental = False
+    scan_type = ""
 
-    #     # Get API Security scan information
-    #     apisec_severity_counters = scan_summary.get("apiSecCounters", {}).get("severityCounters", {})
-    #     apisec_total_count = scan_summary.get("apiSecCounters", {}).get("totalCounter", {})
-    #     apisec_severity_count = get_severity_counts("API-SEC", apisec_severity_counters, apisec_total_count)
-        
-    #     # print(apisec_severity_count)
+    if 'missing' in scan_metadata:
+        is_incremental = False
+    elif 'scans' in scan_metadata:
+        scan_check = scan_metadata.get('scans')
+        is_incremental = scan_check.pop().get('isIncremental')
+    
+    if is_incremental:
+        scan_type = "Incremental Scan"
+    else:
+        scan_type = "Full Scan"
 
-    #     # Get Micro Engines Security scan information
-    #     micro_severity_counters = scan_summary.get("microEnginesCounters", {}).get("severityCounters", {})
-    #     micro_total_count = scan_summary.get("microEnginesCounters", {}).get("totalCounter", {})
-    #     micro_severity_count = get_severity_counts("MICRO-ENG", micro_severity_counters, micro_total_count)
-        
-    #     # print(micro_severity_count)
+    # print(scan_type)
+    # print(scan_details)
+    
+    # all_scan_urls = url_links_for_all_scans(all_scans_details)
+    scan_summary = scan_summary.get("scansSummaries", [{}])[0]
 
-    #     # Get Container Security scan information
-    #     container_severity_counters = scan_summary.get("containersCounters", {}).get("severityCounters", {})
-    #     container_total_count = scan_summary.get("containersCounters", {}).get("totalCounter", {})
-    #     container_severity_count = get_severity_counts("CONTAINER", container_severity_counters, container_total_count)
+    # Get SAST scan information
+    sast_severity_counters = scan_summary.get("sastCounters", {}).get("severityCounters", {})
+    sast_total_count = scan_summary.get("sastCounters", {}).get("totalCounter", {})
+    sast_severity_count = get_severity_counts("SAST", sast_severity_counters, sast_total_count)
+    
+    # print(sast_severity_count)
 
-    #     # print(container_severity_count)
+    # Get KICS scan information
+    kics_severity_counters = scan_summary.get("kicsCounters", {}).get("severityCounters", {})
+    kics_total_count = scan_summary.get("kicsCounters", {}).get("totalCounter", {})
+    kics_severity_count = get_severity_counts("KICS", kics_severity_counters, kics_total_count)
+    
+    # print(kics_severity_count)
 
-    #     severity_total = get_total_by_severity([sast_severity_counters,
-    #                                             kics_severity_counters,
-    #                                             sca_severity_counters,
-    #                                             apisec_severity_counters,
-    #                                             micro_severity_counters, 
-    #                                             container_severity_counters])
-        
-    #     project_info = cx_api_actions.get_project_info_by_id(access_token, project_id)
+    # Get SCA scan information
+    sca_severity_counters = scan_summary.get("scaCounters", {}).get("severityCounters", {})
+    sca_total_count = scan_summary.get("scaCounters", {}).get("totalCounter", {})
+    sca_severity_count = get_severity_counts("SCA", sca_severity_counters, sca_total_count)
+    
+    # print(sca_severity_count)
 
-    #     application = "Unavailable"
-    #     application_ids = project_info.get('applicationIds', [])
-    #     project_tags = project_info.get("tags", {})
-    #     project_tags = list(project_tags.keys())
-    #     applications = []
-        
-    #     for app in application_ids:
-    #         application_info = cx_api_actions.get_application_by_id(access_token, app)
-    #         applications.append(application_info.get("name"))
+    # Get API Security scan information
+    apisec_severity_counters = scan_summary.get("apiSecCounters", {}).get("severityCounters", {})
+    apisec_total_count = scan_summary.get("apiSecCounters", {}).get("totalCounter", {})
+    apisec_severity_count = get_severity_counts("API-SEC", apisec_severity_counters, apisec_total_count)
+    
+    # print(apisec_severity_count)
 
-    #     if applications:
-    #         application = ", ".join(applications)
-        
-    #     description = {
-    #             "Branch" : scan_data.get("branch",""),
-    #             "Status" : scan_data.get("status",""),
-    #             "Scan Origin": scan_data.get("sourceOrigin",""),
-    #             "Scan Type": scan_type, 
-    #             "Scan ID": scan_id,
-    #             "Scan URL" : create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
-    #         }
-    #     description = beautify_description(description)
+    # Get Micro Engines Security scan information
+    micro_severity_counters = scan_summary.get("microEnginesCounters", {}).get("severityCounters", {})
+    micro_total_count = scan_summary.get("microEnginesCounters", {}).get("totalCounter", {})
+    micro_severity_count = get_severity_counts("MICRO-ENG", micro_severity_counters, micro_total_count)
+    
+    # print(micro_severity_count)
 
-    #     # Create JIRA Issue
-    #     jira_ticket_values= {
-    #         "description": description ,
-    #         "summary": scan_data.get('projectName'),
-    #         "lbu": HelperFunctions.get_lbu_name_simple(scan_data.get('projectName')),
-    #         "project_name" : scan_data.get('projectName'),
-    #         "application_name" : application,
-    #         "scan_report_link" : assemble_url_link(url = cx_api_actions.get_tenant_url(), scan_data = scan_data), 
-    #         "num_of_critical" : severity_total.get('critical',0),
-    #         "num_of_high" : severity_total.get('high',0),
-    #         "num_of_medium" : severity_total.get('medium',0),
-    #         "num_of_low" : severity_total.get('low',0),
-    #         "tag" : ",".join(project_tags),
-    #         "Scan URL" :  create_url_links(scan_data=scan_data, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url())
-    #     }
+    # Get Container Security scan information
+    container_severity_counters = scan_summary.get("containersCounters", {}).get("severityCounters", {})
+    container_total_count = scan_summary.get("containersCounters", {}).get("totalCounter", {})
+    container_severity_count = get_severity_counts("CONTAINER", container_severity_counters, container_total_count)
 
-    #     print(json.dumps(jira_ticket_values, indent=1))
-        
-    #     create_issue = jira_api_actions.create_issue(jira_ticket_values)
-    #     # print(create_issue)
+    # print(container_severity_count)
+
+    severity_total = get_total_by_severity([sast_severity_counters,
+                                            kics_severity_counters,
+                                            sca_severity_counters,
+                                            apisec_severity_counters,
+                                            micro_severity_counters, 
+                                            container_severity_counters])
+    
+    project_info = cx_api_actions.get_project_info_by_id(access_token, project_id)
+    print(project_info)
+
+    application = "Unavailable"
+    application_ids = project_info.get('applicationIds', [])
+    project_tags = project_info.get("tags", {})
+    project_tags = list(project_tags.keys())
+    applications = []
+    
+    for app in application_ids:
+        application_info = cx_api_actions.get_application_by_id(access_token, app)
+        applications.append(application_info.get("name"))
+
+    if applications:
+        application = ", ".join(applications)
+    
+    description = {
+            "Branch" : scan_details.get("branch",""),
+            "Status" : scan_details.get("status",""),
+            "Scan Origin": scan_details.get("sourceOrigin",""),
+            "Scan Type": scan_type, 
+            "Scan ID": scan_id,
+            "Scan URL" : create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
+        }
+    description = beautify_description(description)
+
+    # Create JIRA Issue
+    jira_ticket_values= {
+        "issue_id" : jira_issue_id,
+        "description": description,
+        "commit_id" : commit_id,
+        "summary": scan_details.get('projectName'),
+        "lbu": HelperFunctions.get_lbu_name_simple(scan_details.get('projectName')),
+        "project_name" : scan_details.get('projectName'),
+        "application_name" : application,
+        "scan_report_link" : assemble_url_link(url = cx_api_actions.get_tenant_url(), scan_data = scan_details), 
+        "num_of_critical" : severity_total.get('critical',0),
+        "num_of_high" : severity_total.get('high',0),
+        "num_of_medium" : severity_total.get('medium',0),
+        "num_of_low" : severity_total.get('low',0),
+        "tag" : ",".join(project_tags),
+        "Scan URL" :  create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url())
+    }
+
+    print(json.dumps(jira_ticket_values, indent=1))
+    
+    create_issue = jira_api_actions.create_issue(jira_ticket_values)
+    print(create_issue)
 
     #     scan_tags["DAR"] = "DONE"
 

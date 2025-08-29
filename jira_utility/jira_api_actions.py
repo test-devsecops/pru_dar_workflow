@@ -38,7 +38,7 @@ class JiraApiActions:
     def create_issue(self, fields_values):
 
         endpoint = self.apiEndpoints.create_issue()
-        url = f"https://{self.jira_url}{endpoint}"
+        url = f"https://{self.jira_url}{endpoint}{fields_values["issue_id"]}"
 
         headers = {
             "Accept": "application/json",
@@ -48,12 +48,6 @@ class JiraApiActions:
         # TODO Create a mapping config for the custom fields
         payload = {
             "fields": {
-                "project": {
-                    "id": self.project_id
-                },
-                "issuetype": {
-                    "id": self.issuetype_id
-                },
                 "description": str(fields_values['description']),
                 "summary": fields_values["summary"],
                 "customfield_16500" : fields_values["lbu"],
@@ -69,5 +63,5 @@ class JiraApiActions:
             }
         }
 
-        response = self.httpRequest.post_api_request(url, headers=headers, json=payload)
+        response = self.httpRequest.put_api_request(url, headers=headers, json=payload)
         return response
