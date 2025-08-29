@@ -35,7 +35,7 @@ class Config:
             sys.exit(1)
 
         try:
-            token = self.config[section]['CX_TOKEN']
+            token = self.config[section]['CX_EU_TOKEN']
             tenant_name = self.config[section]['TENANT_NAME']
             tenant_iam_url = self.config[section]['TENANT_IAM_URL']
             tenant_url = self.config[section]['TENANT_URL']
