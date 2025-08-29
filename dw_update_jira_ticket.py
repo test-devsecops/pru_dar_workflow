@@ -108,24 +108,23 @@ def create_url_links(scan_data : list, engine_endpoints: dict, url: str) -> list
 def beautify_description(dict : dict):
     return '\n'.join(f'{k}: {v}' for k, v in dict.items())
 
-
 def main():
 
-    if len(sys.argv) < 2:
-        print("No scan ID provided")
-        sys.exit(1)
+    # if len(sys.argv) < 2:
+    #     print("No scan ID provided")
+    #     sys.exit(1)
 
-    scan_id = sys.argv[1]
+    # scan_id = sys.argv[1]
 
-    try:
-        uuid.UUID(scan_id)
-    except ValueError:
-        print(f"Invalid scan ID: {scan_id}")
-        sys.exit(1)
+    # try:
+    #     uuid.UUID(scan_id)
+    # except ValueError:
+    #     print(f"Invalid scan ID: {scan_id}")
+    #     sys.exit(1)
 
     scan_id = sys.argv[1]
     commit_id = sys.argv[2]
-    jira_iissue_id = sys.arv[3]
+    jira_iissue_id = sys.argv[3]
 
     print(scan_id)
     print(commit_id)
