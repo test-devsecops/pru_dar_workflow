@@ -58,7 +58,7 @@ class JiraApiActions:
                 "customfield_16701" : fields_values["num_of_high"],
                 "customfield_16702" : fields_values["num_of_medium"],
                 "customfield_16703" : fields_values["num_of_low"],
-                "customfield_16801" : fields_values['Scan URL'],
+                # "customfield_16801" : fields_values['Scan URL'],
                 "customfield_16800" : fields_values['tag'],
             }
         }
