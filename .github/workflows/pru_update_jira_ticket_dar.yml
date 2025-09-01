@@ -19,12 +19,6 @@ jobs:
 
     steps:
 
-      - name: Debug Environment Variables
-        run: |
-          echo "CX_TENANT_NAME: $CX_TENANT_NAME"
-          echo "CX_TENANT_URL: $CX_TENANT_URL"
-          echo "JIRA_URL: $JIRA_URL"
-
       - name: Checkout repository
         uses: actions/checkout@v3
 

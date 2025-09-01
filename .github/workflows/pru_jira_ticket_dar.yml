@@ -46,7 +46,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run DAR Script
-        run: python3 dw_update_jira_ticket.py \
-            "${{ github.event.inputs.scan_id }}" \
-            "${{ github.event.inputs.commit_id }}" \
-            "${{ github.event.inputs.jira_issue }}" \
+        run: python3 dw_update_jira_ticket.py "${{ github.event.inputs.scan_id }}" "${{ github.event.inputs.commit_id }}" "${{ github.event.inputs.jira_issue }}"

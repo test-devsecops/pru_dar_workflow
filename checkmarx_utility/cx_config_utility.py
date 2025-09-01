@@ -11,10 +11,6 @@ class Config:
         env_iam_url = os.getenv('CX_TENANT_IAM_URL')
         env_tenant_url = os.getenv('CX_TENANT_URL')
 
-        print(env_tenant_name)
-        print(env_iam_url)
-        print(env_tenant_url)
-
         if all([env_token, env_tenant_name, env_iam_url, env_tenant_url]):
             self.token = env_token
             self.tenant_name = env_tenant_name
