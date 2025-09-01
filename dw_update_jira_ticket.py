@@ -283,13 +283,14 @@ def main():
     }
 
     print(json.dumps(jira_ticket_values, indent=1))
-    
+
     create_issue = jira_api_actions.create_issue(jira_ticket_values)
-    print(create_issue)
 
-    #     scan_tags["DAR"] = "DONE"
+    scan_tags = {}
 
-    #     tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
+    scan_tags[jira_issue_id] = commit_id 
+
+    tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
 
 
 if __name__ == "__main__":
