@@ -6,7 +6,7 @@ class Config:
     
     def __init__(self, config_file=None):
         """Load from environment variables first, fallback to config file."""
-        env_token = os.getenv('CX_EU_TOKEN')
+        env_token = os.getenv('CX_TOKEN')
         env_tenant_name = os.getenv('CX_TENANT_NAME')
         env_iam_url = os.getenv('CX_TENANT_IAM_URL')
         env_tenant_url = os.getenv('CX_TENANT_URL')
