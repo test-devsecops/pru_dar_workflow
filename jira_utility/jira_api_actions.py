@@ -64,7 +64,7 @@ class JiraApiActions:
                 self.fields["num_of_high"] : fields_values["num_of_high"],
                 self.fields["num_of_medium"] : fields_values["num_of_medium"],
                 self.fields["num_of_low"] : fields_values["num_of_low"],
-                self.fields["scan_url"] : fields_values['scan_url'],
+                # self.fields["scan_url"] : fields_values['scan_url'],
                 self.fields["tag"] : fields_values['tag'],
             }
         }

@@ -246,7 +246,7 @@ def main():
         "num_of_medium" : severity_total.get('medium',0),
         "num_of_low" : severity_total.get('low',0),
         "tag" : ",".join(project_tags),
-        # "scan_url" :  create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()),
+        "scan_url" :  create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()),
     }
 
     # print(json.dumps(jira_ticket_values, indent=1))
