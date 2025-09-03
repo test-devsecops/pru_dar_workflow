@@ -110,18 +110,6 @@ def beautify_description(dict : dict):
 
 def main():
 
-    # if len(sys.argv) < 2:
-    #     print("No scan ID provided")
-    #     sys.exit(1)
-
-    # scan_id = sys.argv[1]
-
-    # try:
-    #     uuid.UUID(scan_id)
-    # except ValueError:
-    #     print(f"Invalid scan ID: {scan_id}")
-    #     sys.exit(1)
-
     scan_id = sys.argv[1]
     commit_id = sys.argv[2]
     jira_issue_id = sys.argv[3]
@@ -138,30 +126,8 @@ def main():
 
     print("Retrieving access_token")
     access_token = cx_api_actions.get_access_token()
-    # tag_query = { 
-    #     "tags-keys": ["DAR"],
-    #     "tags-values" : [""]
-    #     }
-
-    # scans = cx_api_actions.get_scans_by_tags_keys(access_token, tag_query)
-    # scan_list = scans.get("scans", [])
-
-    # for scan_data in scan_list:
-    #     scan_id = scan_data.get("id")
-    #     project_id = scan_data.get("projectId")
-    #     scan_tags = scan_data.get("tags")
-        
-
-    #     print(f"Scan ID: {scan_id}")
     print("Retrieving Scan Summary")
     scan_summary = cx_api_actions.get_scan_summary(access_token, scan_id)
-    # print(scan_summary)
-
-    # print("getting scan details")
-
-    # all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
-    # print("SCAN DETAILS")
-
 
     print("Retrieving Scan Details")
     scan_details = cx_api_actions.get_scan_details(access_token, scan_id=scan_id)
@@ -280,7 +246,7 @@ def main():
         "num_of_medium" : severity_total.get('medium',0),
         "num_of_low" : severity_total.get('low',0),
         "tag" : ",".join(project_tags),
-        "scan_url" :  create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()),
+        # "scan_url" :  create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()),
     }
 
     # print(json.dumps(jira_ticket_values, indent=1))
@@ -292,6 +258,7 @@ def main():
 
     scan_tags[jira_issue_id] = commit_id 
 
+    print("Tagging Scan on Checkmarx")
     tag_update_response = cx_api_actions.update_scan_tags(access_token, scan_id, tags_dict=scan_tags)
 
 

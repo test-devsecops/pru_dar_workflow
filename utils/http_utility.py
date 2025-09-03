@@ -16,13 +16,10 @@ class HttpRequests:
 
         valid_status_codes = [200, 201]
 
-        print("response ",response.text)
-
         # Check if the response status code is in the array
         if response.status_code in valid_status_codes:
             return response.json()
         else:
-            print("failed ",response.text)
             response.raise_for_status()
 
     def get_api_request(self, url, headers=None, data=None, params=None, json=None):
@@ -42,7 +39,6 @@ class HttpRequests:
         if response.status_code in valid_status_codes:
             return response.json()
         else:
-            print("failed ",response.text)
             response.raise_for_status()
     
     def patch_api_request(self, url, headers=None, data=None, params=None, json=None):
