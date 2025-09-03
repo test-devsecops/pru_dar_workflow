@@ -126,9 +126,9 @@ def main():
     commit_id = sys.argv[2]
     jira_issue_id = sys.argv[3]
 
-    print(scan_id)
-    print(commit_id)
-    print(jira_issue_id)
+    print("scan_id :", scan_id)
+    print("commit_id :" ,commit_id)
+    print("jira_issue_id: ",jira_issue_id)
     
     cx_config_environment = "CX-PRU-NPROD"
     jira_config_environment = "JIRA-EIS"
@@ -136,9 +136,7 @@ def main():
     jira_api_actions = JiraApiActions(jira_config_environment)
     cx_api_actions = CxApiActions(cx_config_environment)
 
-
-
-    print("getting access_token")
+    print("Retrieving access_token")
     access_token = cx_api_actions.get_access_token()
     # tag_query = { 
     #     "tags-keys": ["DAR"],
@@ -155,19 +153,22 @@ def main():
         
 
     #     print(f"Scan ID: {scan_id}")
-    # print("getting scan summary")
+    print("Retrieving Scan Summary")
     scan_summary = cx_api_actions.get_scan_summary(access_token, scan_id)
     # print(scan_summary)
 
     # print("getting scan details")
 
-    all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
+    # all_scans_details = cx_api_actions.get_scan_all_info(access_token=access_token,scan_id=scan_id)
     # print("SCAN DETAILS")
 
+
+    print("Retrieving Scan Details")
     scan_details = cx_api_actions.get_scan_details(access_token, scan_id=scan_id)
     project_id = scan_details.get("projectId")
     # print(scan_details)
 
+    print("Retrieving Scan Metadata")
     scan_metadata = cx_api_actions.get_scan_metadata(access_token, scan_id=scan_id)
     is_incremental = False
     scan_type = ""
@@ -239,7 +240,6 @@ def main():
                                             container_severity_counters])
     
     project_info = cx_api_actions.get_project_info_by_id(access_token, project_id)
-    print(project_info)
 
     application = "Unavailable"
     application_ids = project_info.get('applicationIds', [])
@@ -256,11 +256,11 @@ def main():
     
     description = {
             "Branch" : scan_details.get("branch",""),
-            "Status" : scan_details.get("status",""),
             "Scan Origin": scan_details.get("sourceOrigin",""),
             "Scan Type": scan_type, 
-            "Scan ID": scan_id,
-            "Scan URL" : create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
+            "Status" : scan_details.get("status",""),
+            # "Scan ID": scan_id,
+            # "Scan URL" : create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()) 
         }
     description = beautify_description(description)
 
@@ -269,6 +269,7 @@ def main():
         "issue_id" : jira_issue_id,
         "description": description,
         "commit_id" : commit_id,
+        "scan_id" : scan_id,
         "summary": scan_details.get('projectName'),
         "lbu": HelperFunctions.get_lbu_name_simple(scan_details.get('projectName')),
         "project_name" : scan_details.get('projectName'),
@@ -279,11 +280,12 @@ def main():
         "num_of_medium" : severity_total.get('medium',0),
         "num_of_low" : severity_total.get('low',0),
         "tag" : ",".join(project_tags),
-        "Scan URL" :  create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url())
+        "scan_url" :  create_url_links(scan_data=scan_details, engine_endpoints=engine_endpoints, url=cx_api_actions.get_tenant_url()),
     }
 
-    print(json.dumps(jira_ticket_values, indent=1))
+    # print(json.dumps(jira_ticket_values, indent=1))
 
+    print("Creating Jira Issue")
     create_issue = jira_api_actions.create_issue(jira_ticket_values)
 
     scan_tags = {}

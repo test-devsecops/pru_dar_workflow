@@ -1,0 +1,11 @@
+fields:
+  lbu: customfield_16500
+  project_name: customfield_16501
+  application_name: customfield_16704
+  scan_report_link: customfield_16504
+  num_of_critical: customfield_16700
+  num_of_high: customfield_16701
+  num_of_medium: customfield_16702
+  num_of_low: customfield_16703
+  tag: customfield_16800
+  scan_url: customfield_16801

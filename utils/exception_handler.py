@@ -14,7 +14,7 @@ class ExceptionHandler:
                 print(f"RequestException error occurred: {e}")
                 return None
             except Exception as err:
-                print("An unexpected error occurred:", err)
+                print("An unexpected error occurred:", err.with_traceback())
                 return None
         return wrapper
     
