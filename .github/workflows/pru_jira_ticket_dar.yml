@@ -4,18 +4,36 @@ name: Update Jira Ticket
 on:
   workflow_dispatch:
     inputs:
-      scan_id:
-        description: 'Checkmarx Scan ID'
-        required: true
+      workflow_dispatch:
+    inputs:
+      sast_sca_scan_id:
+        description: " Scan ID for SAST/SCA"
         default: ''
-      commit_id:
-        description: 'Commit ID'
-        required: true
+        type: string
+      sast_sca_commit_id:
+        description: "Commit ID for SAST/SCA"
         default: ''
+        type: string
+      csec_scan_id:
+        description: "CSEC scan ID"
+        default: ''
+        type: string
+      csec_commit_id:
+        description: "Commit ID for CSEC"
+        required: false
+        type: string
+      dast_scan_id:
+        description: "DAST scan ID"
+        default: ''
+        type: string
+      dast_commit_id:
+        description: "Commit ID for DAST"
+        default: ''
+        type: string
       jira_issue:
-        description: 'Jira Issue ID'
-        required: true
+        description: "Commit ID for DAST"
         default: ''
+        type: string
 
 jobs:
   run-dar-workflow:
@@ -46,4 +64,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run DAR Script
-        run: python3 dw_update_jira_ticket.py "${{ github.event.inputs.scan_id }}" "${{ github.event.inputs.commit_id }}" "${{ github.event.inputs.jira_issue }}"
+        run: |
+          python3 dw_update_jira_ticket.py \
+            "${{ github.event.inputs.sast_sca_scan_id }}" \
+            "${{ github.event.inputs.sast_sca_commit_id }}" \
+            "${{ github.event.inputs.csec_scan_id }}" \
+            "${{ github.event.inputs.csec_commit_id }}" \
+            "${{ github.event.inputs.dast_scan_id }}" \
+            "${{ github.event.inputs.dast_commit_id }}" \
+            "${{ github.event.inputs.jira_issue }}"
