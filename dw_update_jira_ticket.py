@@ -112,11 +112,19 @@ def main():
 
     scan_id = sys.argv[1]
     commit_id = sys.argv[2]
-    jira_issue_id = sys.argv[3]
+    csec_scan_id = sys.argv[3]
+    csec_commit_id = sys.argv[4]
+    dast_scan_id = sys.argv[5]
+    dast_commit_id = sys.argv[6]
+    jira_issue_id = sys.argv[7]
 
-    print("scan_id :", scan_id)
-    print("commit_id :" ,commit_id)
     print("jira_issue_id: ",jira_issue_id)
+    print("sast_scan_id :", scan_id)
+    print("sast_commit_id :" ,commit_id)
+    print("csec_scan_id: ",csec_scan_id)
+    print("csec_commit_id :", csec_commit_id)
+    print("dast_scan_id :" ,dast_scan_id)
+    print("dast_commit_id :" ,dast_commit_id)
     
     cx_config_environment = "CX-PRU-NPROD"
     jira_config_environment = "JIRA-EIS"

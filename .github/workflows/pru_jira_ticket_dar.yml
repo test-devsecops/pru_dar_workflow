@@ -18,7 +18,6 @@ on:
         type: string
       csec_commit_id:
         description: "Commit ID for CSEC"
-        required: false
         type: string
       dast_scan_id:
         description: "DAST scan ID"
