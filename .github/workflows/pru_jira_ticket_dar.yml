@@ -4,10 +4,8 @@ name: Update Jira Ticket
 on:
   workflow_dispatch:
     inputs:
-      workflow_dispatch:
-    inputs:
       sast_sca_scan_id:
-        description: " Scan ID for SAST/SCA"
+        description: "Scan ID for SAST/SCA"
         default: ''
         type: string
       sast_sca_commit_id:
